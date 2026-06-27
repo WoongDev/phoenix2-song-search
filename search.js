@@ -12,13 +12,10 @@ const CHANNEL_NAMES = {
 };
 
 let songs = [];
-let activeChannel = "all";
-
 const $input = document.querySelector("#searchInput");
 const $clear = document.querySelector("#clearButton");
 const $count = document.querySelector("#countText");
 const $results = document.querySelector("#results");
-const $filters = document.querySelectorAll(".filter");
 
 function normalizeText(value) {
   return String(value ?? "")
@@ -39,6 +36,11 @@ function compactRaw(value) {
 
 function channelCode(channel) {
   return String(channel).padStart(2, "0");
+}
+
+function sequenceNumber(id) {
+  const digits = String(id ?? "").replace(/\D/g, "");
+  return digits || "-";
 }
 
 function escapeHtml(value) {
@@ -137,7 +139,7 @@ function cardTemplate(song) {
       <div class="info">
         <span>Artist: ${escapeHtml(song.artist || "-")}</span>
         <span>BPM: ${escapeHtml(song.bpm || "-")}</span>
-        <span>ID: ${escapeHtml(song.id || "-")}</span>
+        <span>순번: ${escapeHtml(sequenceNumber(song.id))}</span>
       </div>
 
       <div class="level-block">
@@ -158,12 +160,7 @@ function cardTemplate(song) {
 
 function render() {
   const query = $input.value;
-  const channel = activeChannel;
-
-  let base = songs;
-  if (channel !== "all") {
-    base = base.filter((song) => Number(song.channel) === Number(channel));
-  }
+  const base = songs;
 
   if (!normalizeText(query)) {
     $count.textContent = `총 ${songs.length.toLocaleString("ko-KR")}곡`;
@@ -213,15 +210,6 @@ $clear.addEventListener("click", () => {
   $input.value = "";
   $input.focus();
   render();
-});
-
-$filters.forEach((button) => {
-  button.addEventListener("click", () => {
-    $filters.forEach((btn) => btn.classList.remove("active"));
-    button.classList.add("active");
-    activeChannel = button.dataset.channel;
-    render();
-  });
 });
 
 init();
