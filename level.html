@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PUMP IT UP PHOENIX 2 레벨별 검색</title>
+  <link rel="stylesheet" href="style.css?v=20260627-03" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <p class="eyebrow">PUMP IT UP PHOENIX 2</p>
+      <nav class="page-nav" aria-label="검색 페이지 이동">
+        <a class="nav-button" href="index.html">곡 이름 검색</a>
+        <a class="nav-button active" href="level.html" aria-current="page">레벨별 검색</a>
+      </nav>
+      <h1>레벨별 곡 검색</h1>
+      <p class="desc">스텝 타입과 레벨을 선택하면 해당 곡들을 한글 제목 기준으로 정렬해 보여줍니다.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="search-panel" aria-label="레벨별 검색 영역">
+      <div class="control-grid">
+        <div class="field">
+          <label for="stepType">스텝 타입</label>
+          <select id="stepType">
+            <option value="single">싱글</option>
+            <option value="double">더블</option>
+            <option value="coop">코옵</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="levelSelect">레벨</label>
+          <select id="levelSelect">
+            <option value="">데이터 불러오는 중...</option>
+          </select>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span id="countText">데이터 불러오는 중...</span>
+        <span class="hint">결과는 한글 제목 기준 가나다순으로 정렬됩니다.</span>
+      </div>
+    </section>
+
+    <section id="results" class="results" aria-live="polite"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">Data source: PHOENIX 2 song list JSON</div>
+  </footer>
+
+  <script src="level-search.js?v=20260627-03"></script>
+</body>
+</html>
