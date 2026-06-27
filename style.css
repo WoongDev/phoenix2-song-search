@@ -402,28 +402,59 @@ button:hover { filter: brightness(1.08); }
 .notice-panel {
   margin: 0 0 14px;
   padding: 14px 16px;
-  border: 1px solid rgba(185, 204, 255, 0.20);
+  border: 1px solid rgba(185, 204, 255, 0.22);
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(31, 36, 48, 0.82), rgba(18, 22, 32, 0.82));
+  background: linear-gradient(180deg, rgba(31, 36, 48, 0.86), rgba(18, 22, 32, 0.86));
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
 }
 
-.notice-title {
-  margin-bottom: 6px;
+.notice-panel[hidden] {
+  display: none;
+}
+
+.notice-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.notice-label {
   color: var(--accent2);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 950;
   letter-spacing: 0.04em;
 }
 
-.notice-list {
+.notice-date {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.notice-main-title {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.notice-body {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.notice-body-list {
   margin: 0;
   padding-left: 18px;
   color: var(--muted);
   font-size: 14px;
 }
 
-.notice-list li + li {
+.notice-body-list li + li {
   margin-top: 2px;
 }
 
@@ -525,7 +556,9 @@ button:hover { filter: brightness(1.08); }
 
 @media (max-width: 720px) {
   .notice-panel { padding: 12px 14px; border-radius: 16px; }
-  .notice-list { font-size: 13px; }
+  .notice-main-title { font-size: 15px; }
+  .notice-body,
+  .notice-body-list { font-size: 13px; }
   .level-results {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
