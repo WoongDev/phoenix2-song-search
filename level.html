@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PUMP IT UP PHOENIX 2 레벨별 검색</title>
-  <link rel="stylesheet" href="style.css?v=20260627-03" />
+  <link rel="stylesheet" href="style.css?v=20260627-04" />
 </head>
 <body>
   <header class="site-header">
@@ -20,26 +20,33 @@
   </header>
 
   <main class="wrap">
-    <section class="search-panel" aria-label="레벨별 검색 영역">
-      <div class="control-grid">
-        <div class="field">
-          <label for="stepType">스텝 타입</label>
-          <select id="stepType">
-            <option value="single">싱글</option>
-            <option value="double">더블</option>
-            <option value="coop">코옵</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="levelSelect">레벨</label>
-          <select id="levelSelect">
-            <option value="">데이터 불러오는 중...</option>
-          </select>
+    <section class="search-panel level-panel" aria-label="레벨별 검색 영역">
+      <div class="button-control-block">
+        <div class="control-title">스텝 타입</div>
+        <div class="step-button-grid" role="group" aria-label="스텝 타입 선택">
+          <button class="step-type-button single active" type="button" data-type="single" aria-pressed="true">
+            <span class="badge-top">SINGLE</span>
+            <span class="badge-main">싱글</span>
+          </button>
+          <button class="step-type-button double" type="button" data-type="double" aria-pressed="false">
+            <span class="badge-top">DOUBLE</span>
+            <span class="badge-main">더블</span>
+          </button>
+          <button class="step-type-button coop" type="button" data-type="coop" aria-pressed="false">
+            <span class="badge-top">CO-OP</span>
+            <span class="badge-main">코옵</span>
+          </button>
         </div>
       </div>
+
+      <div class="button-control-block">
+        <div class="control-title" id="levelTitle">레벨</div>
+        <div id="levelButtons" class="level-button-grid" role="group" aria-labelledby="levelTitle"></div>
+      </div>
+
       <div class="meta-row">
         <span id="countText">데이터 불러오는 중...</span>
-        <span class="hint">결과는 한글 제목 기준 가나다순으로 정렬됩니다.</span>
+        <span class="hint">0레벨과 8인 코옵은 제외했습니다. 결과는 한글 제목 기준 가나다순입니다.</span>
       </div>
     </section>
 
@@ -50,6 +57,6 @@
     <div class="wrap">Data source: PHOENIX 2 song list JSON</div>
   </footer>
 
-  <script src="level-search.js?v=20260627-03"></script>
+  <script src="level-search.js?v=20260627-04"></script>
 </body>
 </html>

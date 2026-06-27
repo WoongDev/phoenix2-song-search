@@ -16,9 +16,21 @@ const STEP_LABELS = {
   coop: "Co-op",
 };
 
+const STEP_PREFIX = {
+  single: "S",
+  double: "D",
+};
+
+const LEVEL_NUMBERS = Array.from({ length: 28 }, (_, index) => index + 1);
+const BONUS_LEVEL = "??";
+const COOP_VALUES = [2, 3, 4, 5];
+
 let songs = [];
-const $stepType = document.querySelector("#stepType");
-const $level = document.querySelector("#levelSelect");
+let selectedType = "single";
+let selectedLevel = "S1";
+
+const $stepButtons = Array.from(document.querySelectorAll(".step-type-button"));
+const $levelButtons = document.querySelector("#levelButtons");
 const $count = document.querySelector("#countText");
 const $results = document.querySelector("#results");
 
@@ -40,11 +52,6 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function numericPart(value) {
-  const match = String(value ?? "").match(/\d+/);
-  return match ? Number(match[0]) : Number.MAX_SAFE_INTEGER;
-}
-
 function titleForSort(song) {
   return String(song.titleKo || song.titleEn || "");
 }
@@ -57,37 +64,64 @@ function valuesForType(song, type) {
 }
 
 function normalizeLevelValue(value) {
-  return String(value ?? "").trim();
+  return String(value ?? "").trim().toUpperCase();
 }
 
-function displayLevelValue(type, value) {
+function isInvalidLevelValue(value) {
+  const normalized = normalizeLevelValue(value);
+  return normalized === "S0" || normalized === "D0" || normalized === "0";
+}
+
+function isInvalidCoopValue(value) {
+  return Number(value) === 8 || Number(value) <= 0;
+}
+
+function displaySelectedLabel(type, value) {
   if (type === "coop") return `${value}인`;
   return String(value);
 }
 
-function buildLevelOptions() {
-  const type = $stepType.value;
-  const levels = new Set();
+function buildLevelValue(type, numberOrBonus) {
+  if (type === "coop") return String(numberOrBonus);
+  return `${STEP_PREFIX[type]}${numberOrBonus}`;
+}
 
-  for (const song of songs) {
-    for (const value of valuesForType(song, type)) {
-      levels.add(normalizeLevelValue(value));
-    }
-  }
+function defaultLevelForType(type) {
+  if (type === "single") return "S1";
+  if (type === "double") return "D1";
+  return "2";
+}
 
-  const sorted = Array.from(levels).sort((a, b) => numericPart(a) - numericPart(b) || String(a).localeCompare(String(b), "ko-KR"));
-  const typeHint = type === "coop" ? "인원수 선택" : "레벨 선택";
+function renderStepButtons() {
+  $stepButtons.forEach((button) => {
+    const active = button.dataset.type === selectedType;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
 
-  $level.innerHTML = `<option value="">${typeHint}</option>` + sorted
-    .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(displayLevelValue(type, value))}</option>`)
-    .join("");
+function renderLevelButtons() {
+  const items = selectedType === "coop" ? COOP_VALUES : [...LEVEL_NUMBERS, BONUS_LEVEL];
+
+  $levelButtons.classList.toggle("coop-mode", selectedType === "coop");
+  $levelButtons.innerHTML = items.map((item) => {
+    const value = buildLevelValue(selectedType, item);
+    const label = selectedType === "coop" ? `${item}인` : String(item);
+    const active = normalizeLevelValue(value) === normalizeLevelValue(selectedLevel);
+    return `
+      <button class="level-select-button${active ? " active" : ""}" type="button" data-level="${escapeHtml(value)}" aria-pressed="${active}">
+        ${escapeHtml(label)}
+      </button>
+    `;
+  }).join("");
 }
 
 function levelChips(values, selectedValue = null) {
-  if (!values || values.length === 0) {
+  const validValues = (values || []).filter((value) => !isInvalidLevelValue(value));
+  if (!validValues.length) {
     return '<span class="level-chip empty-chip">-</span>';
   }
-  return values.map((v) => {
+  return validValues.map((v) => {
     const selected = selectedValue !== null && normalizeLevelValue(v) === normalizeLevelValue(selectedValue);
     const cls = selected ? "level-chip selected" : "level-chip";
     return `<span class="${cls}">${escapeHtml(v)}</span>`;
@@ -95,21 +129,22 @@ function levelChips(values, selectedValue = null) {
 }
 
 function coopChips(values, selectedValue = null) {
-  if (!values || values.length === 0) {
+  const validValues = (values || []).filter((value) => !isInvalidCoopValue(value));
+  if (!validValues.length) {
     return '<span class="level-chip empty-chip">-</span>';
   }
-  return values.map((v) => {
+  return validValues.map((v) => {
     const selected = selectedValue !== null && normalizeLevelValue(v) === normalizeLevelValue(selectedValue);
     const cls = selected ? "level-chip selected" : "level-chip";
     return `<span class="${cls}">${escapeHtml(v)}인</span>`;
   }).join("");
 }
 
-function cardTemplate(song, selectedType, selectedLevel) {
+function cardTemplate(song, selectedTypeValue, selectedLevelValue) {
   const channelName = CHANNEL_NAMES[song.channel] ?? "Unknown";
-  const singleSelected = selectedType === "single" ? selectedLevel : null;
-  const doubleSelected = selectedType === "double" ? selectedLevel : null;
-  const coopSelected = selectedType === "coop" ? selectedLevel : null;
+  const singleSelected = selectedTypeValue === "single" ? selectedLevelValue : null;
+  const doubleSelected = selectedTypeValue === "double" ? selectedLevelValue : null;
+  const coopSelected = selectedTypeValue === "coop" ? selectedLevelValue : null;
 
   return `
     <article class="card">
@@ -144,28 +179,26 @@ function cardTemplate(song, selectedType, selectedLevel) {
 }
 
 function matchesSelectedLevel(song, type, level) {
-  return valuesForType(song, type).some((value) => normalizeLevelValue(value) === normalizeLevelValue(level));
+  return valuesForType(song, type).some((value) => {
+    if (type === "coop" && isInvalidCoopValue(value)) return false;
+    if (type !== "coop" && isInvalidLevelValue(value)) return false;
+    return normalizeLevelValue(value) === normalizeLevelValue(level);
+  });
 }
 
 function render() {
-  const type = $stepType.value;
-  const level = $level.value;
-
-  if (!level) {
-    $count.textContent = `총 ${songs.length.toLocaleString("ko-KR")}곡`;
-    $results.innerHTML = '<div class="empty">스텝 타입과 레벨을 선택하면 결과가 표시됩니다. 예: 싱글 S17, 더블 D22, 코옵 2인</div>';
-    return;
-  }
+  renderStepButtons();
+  renderLevelButtons();
 
   const result = songs
-    .filter((song) => matchesSelectedLevel(song, type, level))
+    .filter((song) => matchesSelectedLevel(song, selectedType, selectedLevel))
     .sort((a, b) =>
       titleForSort(a).localeCompare(titleForSort(b), "ko-KR", { sensitivity: "base" }) ||
       a.channel - b.channel ||
       String(a.id).localeCompare(String(b.id))
     );
 
-  const label = `${STEP_LABELS[type]} ${displayLevelValue(type, level)}`;
+  const label = `${STEP_LABELS[selectedType]} ${displaySelectedLabel(selectedType, selectedLevel)}`;
   $count.textContent = `${label} · ${result.length.toLocaleString("ko-KR")}개 결과`;
 
   if (!result.length) {
@@ -173,7 +206,7 @@ function render() {
     return;
   }
 
-  $results.innerHTML = result.map((song) => cardTemplate(song, type, level)).join("");
+  $results.innerHTML = result.map((song) => cardTemplate(song, selectedType, selectedLevel)).join("");
 }
 
 async function init() {
@@ -181,7 +214,6 @@ async function init() {
     const response = await fetch(DATA_URL, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     songs = await response.json();
-    buildLevelOptions();
     render();
   } catch (error) {
     console.error(error);
@@ -190,11 +222,19 @@ async function init() {
   }
 }
 
-$stepType.addEventListener("change", () => {
-  buildLevelOptions();
-  render();
+$stepButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedType = button.dataset.type;
+    selectedLevel = defaultLevelForType(selectedType);
+    render();
+  });
 });
 
-$level.addEventListener("change", render);
+$levelButtons.addEventListener("click", (event) => {
+  const button = event.target.closest(".level-select-button");
+  if (!button) return;
+  selectedLevel = button.dataset.level;
+  render();
+});
 
 init();
