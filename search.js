@@ -81,6 +81,10 @@ function similarity(a, b) {
   return 1 - levenshtein(a, b) / maxLen;
 }
 
+function hasHangul(value) {
+  return /[가-힣]/.test(value);
+}
+
 function scoreSong(song, query) {
   const qNorm = normalizeText(query);
   const qRaw = compactRaw(query);
@@ -96,14 +100,25 @@ function scoreSong(song, query) {
   for (const c of candidates) {
     if (!c.norm) continue;
 
-    if (c.norm === qNorm || c.raw === qRaw) best = Math.max(best, 100);
-    else if (c.norm.startsWith(qNorm)) best = Math.max(best, 92);
-    else if (c.norm.includes(qNorm)) best = Math.max(best, 84);
-    else if (qNorm.includes(c.norm)) best = Math.max(best, 78);
-    else {
-      const sim = similarity(qNorm, c.norm);
-      const threshold = qNorm.length <= 2 ? 0.82 : qNorm.length <= 4 ? 0.62 : 0.48;
-      if (sim >= threshold) best = Math.max(best, Math.round(sim * 70));
+    if (c.norm === qNorm || c.raw === qRaw) {
+      best = Math.max(best, 100);
+    } else if (c.norm.startsWith(qNorm)) {
+      best = Math.max(best, 92);
+    } else if (c.norm.includes(qNorm)) {
+      best = Math.max(best, 84);
+    } else {
+      // 짧은 검색어의 유사검색은 오탐이 많습니다.
+      // 예: "아클루" 검색 시 "클루"가 같이 잡히는 문제를 방지합니다.
+      const minLen = Math.min(qNorm.length, c.norm.length);
+      const maxLen = Math.max(qNorm.length, c.norm.length);
+      const lengthGap = maxLen - minLen;
+
+      if (minLen >= 4 && lengthGap <= 2) {
+        const sim = similarity(qNorm, c.norm);
+        const hangulSearch = hasHangul(qNorm) || hasHangul(c.norm);
+        const threshold = hangulSearch ? 0.78 : 0.68;
+        if (sim >= threshold) best = Math.max(best, Math.round(sim * 70));
+      }
     }
   }
 
