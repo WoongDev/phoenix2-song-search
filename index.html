@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PUMP IT UP PHOENIX 2 곡 검색</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <p class="eyebrow">PUMP IT UP PHOENIX 2</p>
+      <h1>곡 검색</h1>
+      <p class="desc">한글 제목 또는 영문 제목을 입력하면 가장 가까운 곡을 찾아 레벨 정보를 보여줍니다.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="search-panel" aria-label="곡 검색 영역">
+      <label for="searchInput">곡 이름</label>
+      <div class="search-row">
+        <input id="searchInput" type="search" placeholder="예: 고민중독, T.B.H, tbh" autocomplete="off" autofocus />
+        <button id="clearButton" type="button">지우기</button>
+      </div>
+      <div class="meta-row">
+        <span id="countText">데이터 불러오는 중...</span>
+        <span class="hint">대소문자, 공백, 점(.) 일부 기호는 무시합니다.</span>
+      </div>
+    </section>
+
+    <section class="filters" aria-label="채널 필터">
+      <button class="filter active" type="button" data-channel="all">전체</button>
+      <button class="filter" type="button" data-channel="1">01 K-Pop</button>
+      <button class="filter" type="button" data-channel="2">02 Original</button>
+      <button class="filter" type="button" data-channel="3">03 World Music</button>
+      <button class="filter" type="button" data-channel="4">04 Cross Channel</button>
+      <button class="filter" type="button" data-channel="5">05 숏컷</button>
+      <button class="filter" type="button" data-channel="6">06 리믹스</button>
+      <button class="filter" type="button" data-channel="7">07 풀송</button>
+    </section>
+
+    <section id="results" class="results" aria-live="polite"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">Data source: PHOENIX 2 song list JSON</div>
+  </footer>
+
+  <script src="search.js"></script>
+</body>
+</html>
