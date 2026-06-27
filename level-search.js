@@ -140,39 +140,26 @@ function coopChips(values, selectedValue = null) {
   }).join("");
 }
 
-function cardTemplate(song, selectedTypeValue, selectedLevelValue) {
+function cardTemplate(song) {
   const channelName = CHANNEL_NAMES[song.channel] ?? "Unknown";
-  const singleSelected = selectedTypeValue === "single" ? selectedLevelValue : null;
-  const doubleSelected = selectedTypeValue === "double" ? selectedLevelValue : null;
-  const coopSelected = selectedTypeValue === "coop" ? selectedLevelValue : null;
+  const koTitle = song.titleKo || song.titleEn || "제목 없음";
+  const enTitle = song.titleEn && song.titleEn !== koTitle ? song.titleEn : "";
 
   return `
-    <article class="card">
-      <div class="card-head">
-        <div>
-          <h2 class="title-ko">${escapeHtml(song.titleKo || song.titleEn || "제목 없음")}</h2>
-          ${song.titleEn ? `<p class="title-en">${escapeHtml(song.titleEn)}</p>` : ""}
-        </div>
-        <div class="channel">${channelCode(song.channel)} ${escapeHtml(channelName)}</div>
+    <article class="level-card">
+      <div class="level-card-top">
+        <span class="channel mini-channel">${channelCode(song.channel)} ${escapeHtml(channelName)}</span>
+        <span class="mini-seq">순번 ${escapeHtml(sequenceNumber(song.id))}</span>
       </div>
 
-      <div class="info">
+      <div class="level-card-title-block">
+        <h2 class="mini-title-ko">${escapeHtml(koTitle)}</h2>
+        ${enTitle ? `<p class="mini-title-en">${escapeHtml(enTitle)}</p>` : ""}
+      </div>
+
+      <div class="mini-info">
         <span>Artist: ${escapeHtml(song.artist || "-")}</span>
         <span>BPM: ${escapeHtml(song.bpm || "-")}</span>
-        <span>순번: ${escapeHtml(sequenceNumber(song.id))}</span>
-      </div>
-
-      <div class="level-block">
-        <div class="level-label">Single</div>
-        <div class="level-list">${levelChips(song.single, singleSelected)}</div>
-      </div>
-      <div class="level-block">
-        <div class="level-label">Double</div>
-        <div class="level-list">${levelChips(song.double, doubleSelected)}</div>
-      </div>
-      <div class="level-block">
-        <div class="level-label">Co-op</div>
-        <div class="level-list">${coopChips(song.coop, coopSelected)}</div>
       </div>
     </article>
   `;
