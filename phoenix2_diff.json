@@ -551,9 +551,7 @@
           ]
         },
         "coop": {
-          "removed": [
-            2
-          ],
+          "removed": [],
           "added": []
         }
       }
@@ -3334,9 +3332,7 @@
           ]
         },
         "coop": {
-          "removed": [
-            2
-          ],
+          "removed": [],
           "added": []
         }
       }
