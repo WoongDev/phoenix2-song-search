@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PUMP IT UP PHOENIX 2 삭제곡/변경곡 안내</title>
+  <link rel="stylesheet" href="style.css?v=20260629-08" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <p class="eyebrow">PUMP IT UP PHOENIX 1 → PHOENIX 2</p>
+      <section class="notice-panel" data-notice-panel aria-label="공지사항" hidden></section>
+      <nav class="page-nav" aria-label="검색 페이지 이동">
+        <a class="nav-button" href="index.html">곡 이름 검색</a>
+        <a class="nav-button" href="level.html">레벨별 검색</a>
+        <a class="nav-button active" href="diff.html" aria-current="page">삭제곡/변경곡 안내</a>
+      </nav>
+      <h1>삭제곡/변경곡 안내</h1>
+      <p class="desc">PHOENIX 1 기준 데이터와 PHOENIX 2 곡 목록을 비교해 삭제곡과 레벨 구성 변경곡을 안내합니다.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="search-panel diff-panel" aria-label="삭제곡과 변경곡 안내 선택">
+      <div class="diff-mode-buttons" role="group" aria-label="표시할 정보 선택">
+        <button id="removedButton" class="diff-mode-button removed active" type="button" data-mode="removed" aria-pressed="true">
+          <span class="mode-title">삭제곡</span>
+          <span class="mode-sub">PHOENIX 2에서 제외된 곡</span>
+        </button>
+        <button id="changedButton" class="diff-mode-button changed" type="button" data-mode="changed" aria-pressed="false">
+          <span class="mode-title">변경곡</span>
+          <span class="mode-sub">레벨 구성이 변경된 곡</span>
+        </button>
+      </div>
+
+      <div class="diff-legend" aria-label="표시 색상 안내">
+        <span><i class="legend-dot removed-dot"></i>삭제된 기존 레벨</span>
+        <span><i class="legend-dot added-dot"></i>추가된 변경 레벨</span>
+      </div>
+
+      <div class="meta-row">
+        <span id="countText">데이터 불러오는 중...</span>
+        <span class="hint">삭제곡은 PHOENIX 1 기준 레벨을 표시합니다. 변경곡의 곡 정보는 phoenix2_songs.json 기준입니다.</span>
+      </div>
+    </section>
+
+    <section id="results" class="results diff-results" aria-live="polite"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">Data source: phoenix2_songs.json / phoenix2_diff.json</div>
+  </footer>
+
+  <script src="notice.js?v=20260629-08"></script>
+  <script src="diff.js?v=20260629-08"></script>
+</body>
+</html>
