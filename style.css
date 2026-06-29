@@ -923,3 +923,159 @@ button:hover { filter: brightness(1.08); }
     font-size: 12px;
   }
 }
+
+
+/* update-10: 삭제곡/변경곡 결과 카드 compact grid */
+.diff-results {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.diff-card {
+  padding: 14px;
+  border-radius: 18px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.diff-card .card-head {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.diff-card .title-ko {
+  font-size: 18px;
+  line-height: 1.22;
+  word-break: keep-all;
+}
+
+.diff-card .title-en {
+  font-size: 13px;
+  line-height: 1.25;
+  margin-top: 3px;
+}
+
+.diff-card .channel {
+  padding: 4px 8px;
+  font-size: 11px;
+  max-width: 132px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diff-card .info {
+  gap: 6px;
+  margin: 9px 0 10px;
+}
+
+.diff-card .info span {
+  min-height: 26px;
+  padding: 3px 8px;
+  font-size: 12px;
+  max-width: 100%;
+}
+
+.diff-card .level-block {
+  grid-template-columns: 58px 1fr;
+  gap: 7px;
+  margin-top: 6px;
+}
+
+.diff-card .level-label {
+  font-size: 12px;
+  padding-top: 3px;
+}
+
+.diff-card .level-list {
+  gap: 4px;
+}
+
+.diff-card .level-chip {
+  min-height: 25px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.diff-card .chip-change-label {
+  margin-left: 4px;
+  padding: 1px 4px;
+  font-size: 9px;
+}
+
+@media (min-width: 1500px) {
+  .diff-results {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .diff-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .diff-card {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .diff-card .card-head {
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .diff-card .title-ko {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .diff-card .title-en {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .diff-card .channel {
+    max-width: 100%;
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+
+  .diff-card .info {
+    gap: 5px;
+    margin: 7px 0 8px;
+  }
+
+  .diff-card .info span {
+    min-height: 23px;
+    padding: 2px 7px;
+    font-size: 10px;
+  }
+
+  .diff-card .level-block {
+    grid-template-columns: 1fr;
+    gap: 3px;
+    margin-top: 6px;
+  }
+
+  .diff-card .level-label {
+    font-size: 11px;
+    padding-top: 0;
+  }
+
+  .diff-card .level-list {
+    gap: 3px;
+  }
+
+  .diff-card .level-chip {
+    min-height: 22px;
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+
+  .diff-card .chip-change-label {
+    display: none;
+  }
+}
