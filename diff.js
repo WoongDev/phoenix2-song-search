@@ -21,10 +21,17 @@ let songs = [];
 let songMap = new Map();
 let diffData = { removedSongs: [], levelChangedSongs: [] };
 let currentMode = "removed";
+let currentChannel = "all";
 
 const $buttons = Array.from(document.querySelectorAll(".diff-mode-button"));
+const $channelFilter = document.querySelector("#channelFilter");
 const $count = document.querySelector("#countText");
 const $results = document.querySelector("#results");
+
+const koCollator = new Intl.Collator("ko-KR", {
+  sensitivity: "base",
+  numeric: true,
+});
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -46,6 +53,19 @@ function sequenceNumber(id) {
 
 function titleForSort(song) {
   return String(song?.titleKo || song?.titleEn || "");
+}
+
+function compareSongTitle(a, b) {
+  const titleCompare = koCollator.compare(titleForSort(a), titleForSort(b));
+  if (titleCompare !== 0) return titleCompare;
+
+  const enCompare = koCollator.compare(String(a?.titleEn || ""), String(b?.titleEn || ""));
+  if (enCompare !== 0) return enCompare;
+
+  const artistCompare = koCollator.compare(String(a?.artist || ""), String(b?.artist || ""));
+  if (artistCompare !== 0) return artistCompare;
+
+  return koCollator.compare(String(a?.id || ""), String(b?.id || ""));
 }
 
 function normalizeForCompare(value, type) {
@@ -202,21 +222,90 @@ function changedCardTemplate(change) {
   `;
 }
 
+function getChangedItems() {
+  return (diffData.levelChangedSongs || [])
+    .map((change) => ({ change, song: songMap.get(change.id) }))
+    .filter((item) => item.song);
+}
+
+function getChangedCountByChannel() {
+  const counts = new Map();
+  getChangedItems().forEach(({ song }) => {
+    counts.set(song.channel, (counts.get(song.channel) || 0) + 1);
+  });
+  return counts;
+}
+
+function renderChannelFilter() {
+  if (!$channelFilter) return;
+
+  if (currentMode !== "changed") {
+    currentChannel = "all";
+    $channelFilter.innerHTML = `
+      <button class="diff-channel-button active" type="button" data-channel="all" aria-pressed="true">전체</button>
+      <span class="diff-channel-note">삭제곡은 PHOENIX 2 기준 채널 정보가 없어 전체 목록으로 표시합니다.</span>
+    `;
+    $channelFilter.querySelector("button")?.addEventListener("click", () => {
+      currentChannel = "all";
+      render();
+    });
+    return;
+  }
+
+  const counts = getChangedCountByChannel();
+  const total = Array.from(counts.values()).reduce((sum, count) => sum + count, 0);
+
+  const buttons = [
+    { channel: "all", label: "전체", count: total },
+    ...Object.entries(CHANNEL_NAMES)
+      .map(([channel, name]) => ({
+        channel,
+        label: `${channelCode(channel)} ${name}`,
+        count: counts.get(Number(channel)) || 0,
+      }))
+      .filter((item) => item.count > 0),
+  ];
+
+  $channelFilter.innerHTML = buttons.map((item) => {
+    const active = String(currentChannel) === String(item.channel);
+    return `
+      <button
+        class="diff-channel-button ${active ? "active" : ""}"
+        type="button"
+        data-channel="${escapeHtml(item.channel)}"
+        aria-pressed="${active ? "true" : "false"}"
+      >
+        <span>${escapeHtml(item.label)}</span>
+        <span class="diff-channel-count">${item.count.toLocaleString("ko-KR")}</span>
+      </button>
+    `;
+  }).join("");
+
+  Array.from($channelFilter.querySelectorAll(".diff-channel-button")).forEach((button) => {
+    button.addEventListener("click", () => {
+      currentChannel = button.dataset.channel || "all";
+      render();
+    });
+  });
+}
+
 function setMode(mode) {
   currentMode = mode;
+  currentChannel = "all";
+
   $buttons.forEach((button) => {
     const active = button.dataset.mode === currentMode;
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
   });
+
   render();
 }
 
 function renderRemovedSongs() {
-  const items = [...(diffData.removedSongs || [])].sort((a, b) =>
-    titleForSort(a).localeCompare(titleForSort(b), "ko-KR", { sensitivity: "base" }) ||
-    String(a.titleEn || "").localeCompare(String(b.titleEn || ""))
-  );
+  renderChannelFilter();
+
+  const items = [...(diffData.removedSongs || [])].sort(compareSongTitle);
 
   $count.textContent = `삭제곡 · ${items.length.toLocaleString("ko-KR")}개`;
   if (!items.length) {
@@ -228,18 +317,35 @@ function renderRemovedSongs() {
 }
 
 function renderChangedSongs() {
-  const items = [...(diffData.levelChangedSongs || [])].sort((a, b) => {
+  renderChannelFilter();
+
+  let items = [...(diffData.levelChangedSongs || [])];
+
+  if (currentChannel !== "all") {
+    const selectedChannel = Number(currentChannel);
+    items = items.filter((change) => songMap.get(change.id)?.channel === selectedChannel);
+  }
+
+  items.sort((a, b) => {
     const songA = songMap.get(a.id);
     const songB = songMap.get(b.id);
+
     if (songA && songB) {
+      const titleCompare = compareSongTitle(songA, songB);
+      if (titleCompare !== 0) return titleCompare;
+
       return (songA.channel - songB.channel) ||
-        sequenceNumber(songA.id).localeCompare(sequenceNumber(songB.id), undefined, { numeric: true }) ||
-        titleForSort(songA).localeCompare(titleForSort(songB), "ko-KR", { sensitivity: "base" });
+        koCollator.compare(sequenceNumber(songA.id), sequenceNumber(songB.id));
     }
+
     return String(a.id).localeCompare(String(b.id));
   });
 
-  $count.textContent = `변경곡 · ${items.length.toLocaleString("ko-KR")}개`;
+  const channelText = currentChannel === "all"
+    ? "전체"
+    : `${channelCode(currentChannel)} ${CHANNEL_NAMES[Number(currentChannel)] || "Unknown"}`;
+
+  $count.textContent = `변경곡 · ${channelText} · ${items.length.toLocaleString("ko-KR")}개`;
   if (!items.length) {
     $results.innerHTML = '<div class="empty">표시할 변경곡이 없습니다.</div>';
     return;
